@@ -37,6 +37,15 @@ resource "azurerm_key_vault_access_policy" "aks" {
   secret_permissions = ["Get", "List"]
 }
 
+# Grant the CSI driver's identity read access (this is the identity that actually reads secrets)
+resource "azurerm_key_vault_access_policy" "aks_csi" {
+  key_vault_id = azurerm_key_vault.main.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = azurerm_kubernetes_cluster.main.key_vault_secrets_provider[0].secret_identity[0].object_id
+
+  secret_permissions = ["Get", "List"]
+}
+
 # =============================================================================
 # Store the database password
 # =============================================================================

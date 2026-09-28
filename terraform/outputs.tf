@@ -51,3 +51,13 @@ output "get_credentials_command" {
   description = "Command to configure kubectl for the AKS cluster"
   value       = "az aks get-credentials --resource-group ${azurerm_resource_group.main.name} --name ${azurerm_kubernetes_cluster.main.name}"
 }
+
+output "key_vault_csi_client_id" {
+  description = "Client ID of the Key Vault CSI driver identity"
+  value       = azurerm_kubernetes_cluster.main.key_vault_secrets_provider[0].secret_identity[0].client_id
+}
+
+output "key_vault_csi_object_id" {
+  description = "Object ID of the Key Vault CSI driver identity"
+  value       = azurerm_kubernetes_cluster.main.key_vault_secrets_provider[0].secret_identity[0].object_id
+}

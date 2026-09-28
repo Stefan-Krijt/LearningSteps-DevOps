@@ -29,6 +29,11 @@ resource "azurerm_kubernetes_cluster" "main" {
     dns_service_ip = "172.16.0.10"
   }
 
+  key_vault_secrets_provider {
+    secret_rotation_enabled = true
+    secret_rotation_interval = "2m"
+  }
+
   tags = var.tags
 }
 
