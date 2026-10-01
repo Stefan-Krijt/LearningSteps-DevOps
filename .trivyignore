@@ -1,0 +1,30 @@
+# =============================================================================
+# Trivy Ignore List — Accepted Risks
+# =============================================================================
+# These CVEs are present in the Python base image's tooling and are NOT
+# reachable from the LearningSteps API's application code paths.
+# Each entry documents the rationale for accepting the risk.
+#
+# Reviewed: 2026-10-01
+# Review by: 2027-01-01
+# =============================================================================
+
+# msgpack - MessagePack for Python
+# The LearningSteps API does not use MessagePack serialization anywhere.
+# msgpack is a transitive dependency of the base image's pip tooling only.
+# CVE: Out-of-bounds read on Unpacker reuse.
+GHSA-6v7p-g79w-8964
+
+# setuptools - Path Traversal in PackageIndex
+# The LearningSteps API does not use setuptools at runtime.
+# setuptools is present for pip's build tooling only.
+# CVE: Path traversal when installing packages from untrusted indexes.
+CVE-2025-47273
+
+# urllib3 - Proxy TLS + Chunk parser DoS
+# The LearningSteps API is a server; it does not make outbound HTTPS
+# requests through proxies. urllib3 is a transitive dependency.
+# CVE: TLS interception via proxy configuration override.
+# CVE: DoS via unbounded memory in chunk parser.
+CVE-2026-97687
+CVE-2026-97689

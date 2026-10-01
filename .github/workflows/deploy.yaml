@@ -69,6 +69,7 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
+          trivyignores: '.trivyignore'
 
       - name: Run tfsec scan on Terraform
         uses: aquasecurity/tfsec-action@v1.0.3
