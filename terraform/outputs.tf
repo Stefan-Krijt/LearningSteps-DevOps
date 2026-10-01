@@ -28,13 +28,13 @@ output "aks_resource_group" {
 }
 
 output "postgres_fqdn" {
-  description = "PostgreSQL Flexible Server FQDN (private)"
-  value       = azurerm_postgresql_flexible_server.main.fqdn
+  description = "PostgreSQL Flexible Server FQDN (externally managed)"
+  value       = "psql-learningsteps-restored.postgres.database.azure.com"
 }
 
 output "postgres_database" {
-  description = "PostgreSQL database name"
-  value       = azurerm_postgresql_flexible_server_database.app.name
+  description = "PostgreSQL database name (externally managed)"
+  value       = "learning_journal"
 }
 
 output "key_vault_name" {
