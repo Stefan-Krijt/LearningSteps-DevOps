@@ -39,6 +39,15 @@ RUN apt-get update \
     && apt-get -y clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Upgrade the base image's Python tooling
+RUN pip install --no-cache-dir --upgrade \
+        pip \
+        setuptools \
+        wheel \
+        urllib3 \
+        msgpack \
+        jaraco.context
+
 # Non-root user
 RUN useradd --create-home --uid 1000 appuser
 
