@@ -52,3 +52,39 @@ resource "azurerm_key_vault_access_policy" "aks_csi" {
 # The db-password, db-host, db-name, and db-user secrets already exist in
 # Key Vault. Terraform will leave them untouched because they are no longer
 # declared as resources.
+
+# =============================================================================
+# Database credentials
+# =============================================================================
+
+resource "azurerm_key_vault_secret" "db_password" {
+  name         = "db-password"
+  value        = random_password.postgres.result
+  key_vault_id = azurerm_key_vault.main.id
+
+  depends_on = [azurerm_key_vault_access_policy.deployer]
+}
+
+resource "azurerm_key_vault_secret" "db_host" {
+  name         = "db-host"
+  value        = azurerm_postgresql_flexible_server.main.fqdn
+  key_vault_id = azurerm_key_vault.main.id
+
+  depends_on = [azurerm_key_vault_access_policy.deployer]
+}
+
+resource "azurerm_key_vault_secret" "db_name" {
+  name         = "db-name"
+  value        = azurerm_postgresql_flexible_server_database.app.name
+  key_vault_id = azurerm_key_vault.main.id
+
+  depends_on = [azurerm_key_vault_access_policy.deployer]
+}
+
+resource "azurerm_key_vault_secret" "db_user" {
+  name         = "db-user"
+  value        = var.postgres_admin_user
+  key_vault_id = azurerm_key_vault.main.id
+
+  depends_on = [azurerm_key_vault_access_policy.deployer]
+}
