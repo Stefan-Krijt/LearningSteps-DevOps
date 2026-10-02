@@ -16,37 +16,22 @@ spec:
     spec:
       containers:
         - name: api
-          image: acrlearningstepslokiyna78be3.azurecr.io/learningsteps-api:v1
+          image: acrlearningstepslokiyna78be3.azurecr.io/learningsteps-api:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              DB_USER=$(cat /mnt/secrets-store/db-user)
+              DB_PASSWORD=$(cat /mnt/secrets-store/db-password)
+              DB_HOST=$(cat /mnt/secrets-store/db-host)
+              DB_NAME=$(cat /mnt/secrets-store/db-name)
+              export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}?sslmode=require"
+              export SECRET_KEY="dev-secret-key"
+              export ENVIRONMENT="production"
+              echo "Starting API with database host: ${DB_HOST}"
+              exec uvicorn main:app --host 0.0.0.0 --port 8000
           ports:
             - containerPort: 8000
-          env:
-            - name: ENVIRONMENT
-              valueFrom:
-                configMapKeyRef:
-                  name: learningsteps-config
-                  key: ENVIRONMENT
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: learningsteps-db
-                  key: db-password
-            - name: DB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: learningsteps-db
-                  key: db-host
-            - name: DB_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: learningsteps-db
-                  key: db-name
-            - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: learningsteps-db
-                  key: db-user
-            - name: DATABASE_URL
-              value: "postgresql://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):5432/$(DB_NAME)?sslmode=require"
           resources:
             requests:
               cpu: 100m
@@ -66,6 +51,10 @@ spec:
               port: 8000
             initialDelaySeconds: 10
             periodSeconds: 10
+          volumeMounts:
+            - name: kv-secrets
+              mountPath: /mnt/secrets-store
+              readOnly: true
       volumes:
         - name: kv-secrets
           csi:

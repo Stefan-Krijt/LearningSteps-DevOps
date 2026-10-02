@@ -1,0 +1,60 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: learningsteps-schema-init
+  labels:
+    app: learningsteps-schema-init
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: learningsteps-schema-init
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: schema-init
+          image: acrlearningstepslokiyna78be3.azurecr.io/learningsteps-api:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              DB_USER=$(cat /mnt/secrets-store/db-user)
+              DB_PASSWORD=$(cat /mnt/secrets-store/db-password)
+              DB_HOST=$(cat /mnt/secrets-store/db-host)
+              DB_NAME=$(cat /mnt/secrets-store/db-name)
+              export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}?sslmode=require"
+              echo "Creating schema on ${DB_HOST}..."
+              python -c "
+import asyncpg
+import asyncio
+import os
+
+async def create_table():
+    conn = await asyncpg.connect(os.environ['DATABASE_URL'])
+    await conn.execute('''
+        CREATE TABLE IF NOT EXISTS entries (
+            id VARCHAR(36) PRIMARY KEY,
+            data JSONB NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    await conn.execute('CREATE INDEX IF NOT EXISTS idx_entries_created_at ON entries(created_at)')
+    await conn.execute('CREATE INDEX IF NOT EXISTS idx_entries_data_gin ON entries USING GIN (data)')
+    print('Schema initialized successfully')
+    await conn.close()
+
+asyncio.run(create_table())
+"
+          volumeMounts:
+            - name: kv-secrets
+              mountPath: /mnt/secrets-store
+              readOnly: true
+      volumes:
+        - name: kv-secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: learningsteps-kv
