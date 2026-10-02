@@ -24,7 +24,7 @@ echo "Fetching CSI driver identity for cluster: $AKS_CLUSTER"
 CSI_CLIENT_ID=$(az aks show \
   --resource-group $RESOURCE_GROUP \
   --name $AKS_CLUSTER \
-  --query "keyVaultSecretsProvider.secretIdentity.clientId" -o tsv)
+  --query "addonProfiles.azureKeyvaultSecretsProvider.identity.clientId" -o tsv)
 
 if [ -z "$CSI_CLIENT_ID" ]; then
   echo "ERROR: Could not retrieve CSI client ID. Is the CSI driver enabled?"
@@ -48,6 +48,7 @@ cp k8s/service.yaml /tmp/learningsteps-k8s/
 cp k8s/configmap.yaml /tmp/learningsteps-k8s/
 cp k8s/hpa.yaml /tmp/learningsteps-k8s/
 cp k8s/schema-job.yaml /tmp/learningsteps-k8s/
+cp k8s/schema-configmap.yaml /tmp/learningsteps-k8s/
 
 echo "Applying manifests..."
 

@@ -19,37 +19,18 @@ spec:
           args:
             - |
               set -e
-              DB_USER=$(cat /mnt/secrets-store/db-user)
-              DB_PASSWORD=$(cat /mnt/secrets-store/db-password)
-              DB_HOST=$(cat /mnt/secrets-store/db-host)
-              DB_NAME=$(cat /mnt/secrets-store/db-name)
+              export DB_USER=$(cat /mnt/secrets-store/db-user)
+              export DB_PASSWORD=$(cat /mnt/secrets-store/db-password)
+              export DB_HOST=$(cat /mnt/secrets-store/db-host)
+              export DB_NAME=$(cat /mnt/secrets-store/db-name)
               export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}?sslmode=require"
-              echo "Creating schema on ${DB_HOST}..."
-              python -c "
-import asyncpg
-import asyncio
-import os
-
-async def create_table():
-    conn = await asyncpg.connect(os.environ['DATABASE_URL'])
-    await conn.execute('''
-        CREATE TABLE IF NOT EXISTS entries (
-            id VARCHAR(36) PRIMARY KEY,
-            data JSONB NOT NULL,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    await conn.execute('CREATE INDEX IF NOT EXISTS idx_entries_created_at ON entries(created_at)')
-    await conn.execute('CREATE INDEX IF NOT EXISTS idx_entries_data_gin ON entries USING GIN (data)')
-    print('Schema initialized successfully')
-    await conn.close()
-
-asyncio.run(create_table())
-"
+              python /scripts/init_schema.py
           volumeMounts:
             - name: kv-secrets
               mountPath: /mnt/secrets-store
+              readOnly: true
+            - name: schema-script
+              mountPath: /scripts
               readOnly: true
       volumes:
         - name: kv-secrets
@@ -58,3 +39,6 @@ asyncio.run(create_table())
             readOnly: true
             volumeAttributes:
               secretProviderClass: learningsteps-kv
+        - name: schema-script
+          configMap:
+            name: schema-init-script

@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: schema-init-script
+data:
+  init_schema.py: |
+    import asyncpg
+    import asyncio
+    import os
+
+    async def create_table():
+        conn = await asyncpg.connect(os.environ['DATABASE_URL'])
+        await conn.execute('''
+            CREATE TABLE IF NOT EXISTS entries (
+                id VARCHAR(36) PRIMARY KEY,
+                data JSONB NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        await conn.execute('CREATE INDEX IF NOT EXISTS idx_entries_created_at ON entries(created_at)')
+        await conn.execute('CREATE INDEX IF NOT EXISTS idx_entries_data_gin ON entries USING GIN (data)')
+        print('Schema initialized successfully')
+        await conn.close()
+
+    asyncio.run(create_table())
