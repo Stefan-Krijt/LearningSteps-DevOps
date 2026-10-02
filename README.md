@@ -585,46 +585,55 @@ LearningSteps-DevOps/
 ├── .github/
 │   └── workflows/
 │       └── deploy.yaml                 # CI/CD pipeline (build, scan, push, deploy)
-├── app/
-│   └── api/                            # FastAPI application code
-│       ├── main.py
-│       ├── requirements.txt
-│       ├── models/
-│       ├── repositories/
-│       ├── routers/
-│       └── services/
+├── app/                                 # FastAPI application (cloned from upstream)
+│   ├── .devcontainer/                   # Dev Container config
+│   ├── .vscode/                         # VS Code settings
+│   ├── api/
+│   │   ├── main.py                      # FastAPI entrypoint
+│   │   ├── requirements.txt             # Python dependencies
+│   │   ├── models/entry.py              # Pydantic models
+│   │   ├── repositories/                # Repository pattern (interface + Postgres)
+│   │   ├── routers/journal_router.py    # API routes
+│   │   └── services/entry_service.py    # Business logic
+│   ├── .env-sample                      # Environment template
+│   ├── .gitignore                       # Python ignores
+│   ├── README.md                        # Upstream app README
+│   ├── database_setup.sql               # Initial schema
+│   ├── start.sh                         # Local dev startup script
+│   └── test_api.py                      # API tests
 ├── k8s/
-│   ├── configmap.yaml                  # Non-secret environment vars
-│   ├── deployment.yaml                 # API pod spec (reads secrets from CSI)
-│   ├── hpa.yaml                        # Horizontal Pod Autoscaler
-│   ├── schema-configmap.yaml           # Python schema init script
-│   ├── schema-job.yaml                 # Job that creates the entries table
-│   ├── secretproviderclass.yaml        # CSI driver config for Key Vault
-│   └── service.yaml                    # LoadBalancer service
+│   ├── configmap.yaml                   # Non-secret environment vars
+│   ├── deployment.yaml                  # API pod spec (reads secrets from CSI)
+│   ├── hpa.yaml                         # Horizontal Pod Autoscaler
+│   ├── schema-configmap.yaml            # Python schema init script
+│   ├── schema-job.yaml                  # Job that creates the entries table
+│   ├── secretproviderclass.yaml         # CSI driver config for Key Vault
+│   └── service.yaml                     # LoadBalancer service
 ├── scripts/
-│   ├── bootstrap-backend.sh            # One-time Terraform backend setup
-│   └── deploy-k8s.sh                   # Deploy K8s manifests (auto CSI ID)
+│   ├── bootstrap-backend.sh             # One-time Terraform backend setup
+│   └── deploy-k8s.sh                    # Deploy K8s manifests (auto CSI ID)
 ├── terraform/
-│   ├── backend.tf                      # Remote state backend config
-│   ├── main.tf                         # Provider + resource group
-│   ├── variables.tf                    # Input variables
-│   ├── network.tf                      # VNet, subnets, NSGs
-│   ├── aks.tf                          # AKS cluster
-│   ├── acr.tf                          # Azure Container Registry
-│   ├── postgres.tf                     # PostgreSQL Flexible Server
-│   ├── keyvault.tf                     # Key Vault + secrets
-│   ├── iam.tf                          # GitHub Actions + AKS role assignments
-│   ├── outputs.tf                      # Output values
-│   ├── terraform.tfvars.example        # Example variable values
-│   └── .terraform.lock.hcl             # Provider version lock
-├── screenshots/                        # 47 verification screenshots
-├── Dockerfile                          # Multi-stage container build
+│   ├── backend.tf                       # Remote state backend config
+│   ├── main.tf                          # Provider + resource group
+│   ├── variables.tf                     # Input variables
+│   ├── network.tf                       # VNet, subnets, NSGs
+│   ├── aks.tf                           # AKS cluster
+│   ├── acr.tf                           # Azure Container Registry
+│   ├── postgres.tf                      # PostgreSQL Flexible Server
+│   ├── keyvault.tf                      # Key Vault + secrets
+│   ├── iam.tf                           # GitHub Actions + AKS role assignments
+│   ├── outputs.tf                       # Output values
+│   ├── terraform.tfvars                 # Local variables (gitignored)
+│   └── .terraform.lock.hcl              # Provider version lock
+├── screenshots/                         # 47 verification screenshots
+├── Dockerfile                           # Multi-stage container build
 ├── .dockerignore
 ├── .gitignore
-├── .trivyignore                        # Documented CVE exceptions
-├── LICENSE
+├── .trivyignore                         # Documented CVE exceptions
 └── README.md
 ```
+
+**Note:** The `app/` folder contains the unmodified upstream LearningSteps application code (cloned from [CyberstepsDE/learningsteps](https://github.com/CyberstepsDE/learningsteps)). The `app/README.md` is the upstream project's readme; this document is the infrastructure project's readme.
 
 ---
 
